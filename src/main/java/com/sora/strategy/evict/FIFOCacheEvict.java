@@ -5,6 +5,7 @@ import com.sora.map.FIFOMap;
 import com.sora.mediator.CacheEvictMediator;
 
 /**
+ * FIFO驱逐策略类
  * @author Sora
  */
 public class FIFOCacheEvict extends AbstractCacheEvict{
@@ -16,7 +17,7 @@ public class FIFOCacheEvict extends AbstractCacheEvict{
         }
 
         FIFOMap<K,V> cacheDataMap = (FIFOMap<K,V>)context.getCacheDataMap();
-        boolean full = cacheDataMap.size() > context.getMaxSize();
+        boolean full = cacheDataMap.size() >= context.getMaxSize()*context.getExpectRemoveRate();
         if(full){
             // 如果数据数目大于maxSize,则开始驱逐数据
             int expectSize = (int)(context.getMaxSize() * context.getExpectRemoveRate());

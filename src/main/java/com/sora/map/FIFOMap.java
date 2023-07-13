@@ -15,7 +15,16 @@ public class FIFOMap<K,V> extends HashMap<K,V> {
     /**
      * 用来记录键值对进入Map的顺序
      */
-    Deque<K> FIFODeque = new ArrayDeque<>();
+    Deque<K> FIFODeque;
+
+    public FIFOMap(){
+
+    }
+
+    public FIFOMap(int maxSize) {
+        super(maxSize);
+        FIFODeque = new ArrayDeque<>(maxSize);
+    }
 
     /**
      * 当数据加入Map时,也会加入双端队列FIFODeque{@link FIFOMap#FIFODeque}

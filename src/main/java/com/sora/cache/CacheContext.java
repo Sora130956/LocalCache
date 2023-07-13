@@ -6,6 +6,7 @@ import com.sora.mediator.CacheEvictMediator;
 import com.sora.strategy.evict.AbstractCacheEvict;
 
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -44,6 +45,14 @@ public class CacheContext<K,V>{
 
     private CacheContext(){}
 
+    public CacheContext(Map<K, V> cacheDataMap, AbstractCacheEvict cacheEvict, String evictType, int maxSize, float expectRemoveRate) {
+        this.cacheDataMap = cacheDataMap;
+        this.cacheEvict = cacheEvict;
+        this.evictType = evictType;
+        this.maxSize = maxSize;
+        this.expectRemoveRate = expectRemoveRate;
+    }
+
     public String getEvictType(){
         return this.evictType;
     }
@@ -64,10 +73,28 @@ public class CacheContext<K,V>{
 
         // 触发驱逐策略后,如果还无法容纳数据,则抛出异常。
         if (cacheDataMap.size() < maxSize){
-            V oldVal = cacheDataMap.put(key, value);
-            return oldVal;
+            return cacheDataMap.put(key, value);
         } else {
             throw new CacheRuntimeException("缓存已满,无法添加更多数据。");
         }
+    }
+
+    public int size(){
+        return cacheDataMap.size();
+    }
+
+    /**
+     * @return 返回cacheDataMap中的键值对内容
+     */
+    @Override
+    public String toString() {
+        Set<Map.Entry<K, V>> entries = cacheDataMap.entrySet();
+        StringBuilder sb = new StringBuilder();
+        sb.append("CacheSize:").append(cacheDataMap.size()).append("\r\n");
+        sb.append("MaxSize:").append(this.maxSize).append("\r\n");
+        for(Map.Entry<K,V> entry : entries){
+            sb.append("Key:").append(entry.getKey()).append("   Value:").append(entry.getValue()).append("\r\n");
+        }
+        return sb.toString();
     }
 }
