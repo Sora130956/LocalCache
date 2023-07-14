@@ -11,11 +11,15 @@ import java.util.Map;
  */
 public class CacheMapFactory {
 
-    public static <K,V> Map<K,V> getCacheMap(String evictType,int maxSize) throws CacheRuntimeException {
+    public static <K,V> Map<K,V> getCacheMap(String evictType, int maxSize, float expectRemoveRate) throws CacheRuntimeException {
         switch (evictType){
 
             case CacheEvictConsts.FIFO_EVICT:{
                 return new FIFOMap<K,V>(maxSize);
+            }
+
+            case CacheEvictConsts.LRU:{
+                return new LRUMap<>(maxSize,expectRemoveRate);
             }
 
             default:{

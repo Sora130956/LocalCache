@@ -12,9 +12,9 @@ public class TestCacheContext {
     @Test
     public void testCacheContextBuilder() throws CacheRuntimeException {
         CacheContext<String,String> cacheContext = CacheContextBuilder.startBuilding()
-                .evictType(CacheEvictConsts.FIFO_EVICT)
+                .evictType(CacheEvictConsts.LRU)
                 .maxSize(32)
-                .expectRemoveRate(0.6F)
+                .expectRemoveRate(0.8F)
                 .build();
 
         for(int i=0;i<100;i++){

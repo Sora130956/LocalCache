@@ -59,7 +59,7 @@ public class CacheContextBuilder {
      */
     public <K,V> CacheContext<K,V> build() throws CacheRuntimeException {
         return new CacheContext<K, V>(
-                CacheMapFactory.getCacheMap(this.evictType,this.maxSize),
+                CacheMapFactory.getCacheMap(this.evictType,this.maxSize,this.expectRemoveRate),
                 CacheEvictFactory.getCacheEvict(this.evictType),
                 this.evictType,
                 this.maxSize,

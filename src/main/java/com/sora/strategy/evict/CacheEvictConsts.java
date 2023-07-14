@@ -10,6 +10,6 @@ import java.util.Map;
 public class CacheEvictConsts {
     public static final String FIFO_EVICT = "FIFO";
 
-
+    public static final String LRU = "LRU";
 
 }
