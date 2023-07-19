@@ -1,8 +1,9 @@
 package com.sora.cache;
 
 
+import com.sora.annotation.CacheInterceptor;
 import com.sora.exception.CacheRuntimeException;
-import com.sora.mediator.CacheEvictMediator;
+import com.sora.mediator.CacheContextMediator;
 import com.sora.strategy.evict.AbstractCacheEvict;
 
 import java.util.Map;
@@ -43,7 +44,7 @@ public class CacheContext<K,V>{
      */
     private float expectRemoveRate;
 
-    private CacheContext(){}
+    public CacheContext(){}
 
     public CacheContext(Map<K, V> cacheDataMap, AbstractCacheEvict cacheEvict, String evictType, int maxSize, float expectRemoveRate) {
         this.cacheDataMap = cacheDataMap;
@@ -61,16 +62,11 @@ public class CacheContext<K,V>{
         return cacheDataMap.get(key);
     }
 
+    /**
+     * 在put方法上开启evict
+     */
+    @CacheInterceptor(evict = true)
     public V put(K key,V value) throws CacheRuntimeException {
-        // 缓存Map容量超过maxSize,触发驱逐策略
-        if (cacheDataMap.size() >= maxSize){
-            cacheEvict.<K,V>doEvict(new CacheEvictMediator<K,V>()
-                    .cacheDataMap(this.cacheDataMap)
-                    .evictType(this.evictType)
-                    .expectRemoveRate(this.expectRemoveRate)
-                    .maxSize(this.maxSize));
-        }
-
         // 触发驱逐策略后,如果还无法容纳数据,则抛出异常。
         if (cacheDataMap.size() < maxSize){
             return cacheDataMap.put(key, value);
@@ -96,5 +92,25 @@ public class CacheContext<K,V>{
             sb.append("Key:").append(entry.getKey()).append("   Value:").append(entry.getValue()).append("\r\n");
         }
         return sb.toString();
+    }
+
+
+    /**
+     * get方法只有同一个包下的类才能访问
+     */
+    Map<K, V> getCacheDataMap() {
+        return cacheDataMap;
+    }
+
+    AbstractCacheEvict getCacheEvict() {
+        return cacheEvict;
+    }
+
+    int getMaxSize() {
+        return maxSize;
+    }
+
+    float getExpectRemoveRate() {
+        return expectRemoveRate;
     }
 }

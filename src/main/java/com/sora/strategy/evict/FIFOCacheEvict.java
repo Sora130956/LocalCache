@@ -2,7 +2,7 @@ package com.sora.strategy.evict;
 
 import com.sora.exception.CacheRuntimeException;
 import com.sora.map.FIFOMap;
-import com.sora.mediator.CacheEvictMediator;
+import com.sora.mediator.CacheContextMediator;
 
 /**
  * FIFO驱逐策略类
@@ -11,7 +11,7 @@ import com.sora.mediator.CacheEvictMediator;
 public class FIFOCacheEvict extends AbstractCacheEvict{
 
     @Override
-    public <K,V> boolean doEvict(CacheEvictMediator<K,V> context) throws CacheRuntimeException {
+    public <K,V> boolean doEvict(CacheContextMediator<K,V> context) throws CacheRuntimeException {
         if (!CacheEvictConsts.FIFO_EVICT.equals(context.getEvictType())){
             throw new CacheRuntimeException("驱逐策略不匹配,尝试驱逐数据失败");
         }

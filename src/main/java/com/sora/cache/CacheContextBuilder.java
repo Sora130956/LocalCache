@@ -3,11 +3,9 @@ package com.sora.cache;
 import com.sora.exception.CacheRuntimeException;
 import com.sora.map.CacheEvictFactory;
 import com.sora.map.CacheMapFactory;
-import com.sora.strategy.evict.AbstractCacheEvict;
+import com.sora.proxy.CacheContextProxy;
 import com.sora.strategy.evict.CacheEvictConsts;
 
-import java.security.Key;
-import java.util.Map;
 
 /**
  * Cache上下文的建造者类
@@ -58,13 +56,15 @@ public class CacheContextBuilder {
      * @param <V> 缓存数据Map中存放的值的类型
      */
     public <K,V> CacheContext<K,V> build() throws CacheRuntimeException {
-        return new CacheContext<K, V>(
+        CacheContext<K,V> cacheContext = new CacheContext<>(
                 CacheMapFactory.getCacheMap(this.evictType,this.maxSize,this.expectRemoveRate),
                 CacheEvictFactory.getCacheEvict(this.evictType),
                 this.evictType,
                 this.maxSize,
                 this.expectRemoveRate
         );
+        // 返回代理对象
+        return new CacheContextProxy<>(cacheContext).proxy();
     }
 
 }

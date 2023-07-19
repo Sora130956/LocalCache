@@ -1,7 +1,7 @@
 package com.sora.strategy.evict;
 
 import com.sora.exception.CacheRuntimeException;
-import com.sora.mediator.CacheEvictMediator;
+import com.sora.mediator.CacheContextMediator;
 
 /**
  * LRU驱逐策略类
@@ -10,7 +10,7 @@ import com.sora.mediator.CacheEvictMediator;
 public class LRUCacheEvict extends AbstractCacheEvict {
 
     @Override
-    public <K, V> boolean doEvict(CacheEvictMediator<K, V> context) throws CacheRuntimeException {
+    public <K, V> boolean doEvict(CacheContextMediator<K, V> context) throws CacheRuntimeException {
         //DO NOTHING
         return true;
     }
