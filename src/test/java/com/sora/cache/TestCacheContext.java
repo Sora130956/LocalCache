@@ -58,7 +58,7 @@ public class TestCacheContext {
                 .expectRemoveRate(0.8F)
                 .build();
 
-        int N = 10000;
+        int N = 1000000;
         int weight = 80;
         int border = 100;
         String[] randoms = randomNumberWithWeighting(border, weight, N);

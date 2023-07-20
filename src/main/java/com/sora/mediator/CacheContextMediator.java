@@ -1,6 +1,6 @@
 package com.sora.mediator;
 
-import com.sora.cache.CacheContext;
+import com.sora.strategy.evict.AbstractCacheEvict;
 
 import java.util.Map;
 
@@ -8,7 +8,7 @@ import java.util.Map;
  * CacheContext中介类,保存了CacheContext的各种属性,用于在各个类之间传参,保护了CacheContext的属性不对外暴露。
  * @author Sora
  */
-public class CacheContextMediator<K,V> implements ICacheContextMediator {
+public class CacheContextMediator<K,V> extends BaseCacheContextMediator {
 
     /**
      * 保存缓存数据的Map
@@ -30,8 +30,10 @@ public class CacheContextMediator<K,V> implements ICacheContextMediator {
      */
     private int maxSize;
 
-    public static CacheContextMediator newInstence(){
-        return new CacheContextMediator();
+    private AbstractCacheEvict cacheEvict;
+
+    public static <K,V> CacheContextMediator newInstence(){
+        return new CacheContextMediator<K,V>();
     }
 
     public Map<K, V> getCacheDataMap() {
@@ -49,6 +51,10 @@ public class CacheContextMediator<K,V> implements ICacheContextMediator {
 
     public int getMaxSize() {
         return maxSize;
+    }
+
+    public AbstractCacheEvict getCacheEvict() {
+        return cacheEvict;
     }
 
     public CacheContextMediator<K, V> cacheDataMap(Map<K, V> cacheDataMap) {
@@ -70,4 +76,10 @@ public class CacheContextMediator<K,V> implements ICacheContextMediator {
         this.maxSize = maxSize;
         return this;
     }
+
+    public CacheContextMediator<K, V> cacheEvict(AbstractCacheEvict cacheEvict) {
+        this.cacheEvict = cacheEvict;
+        return this;
+    }
+
 }

@@ -3,5 +3,5 @@ package com.sora.mediator;
 /**
  * @author Sora
  */
-public interface ICacheContextMediator {
+public abstract class BaseCacheContextMediator {
 }

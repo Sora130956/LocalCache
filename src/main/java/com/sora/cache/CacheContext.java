@@ -12,6 +12,7 @@ import java.util.Set;
 
 /**
  * Cache上下文,维护一个Map来保存缓存数据
+ * 一般来说,CacheContext构建好了之后,其中的成员就不允许变更了。
  * @param <K> 缓存Map的Key
  * @param <V> 缓存Map的Value
  * @author Sora

@@ -1,29 +1,69 @@
 package com.sora.cache;
 
+import com.sora.Interceptor.BaseCacheInterceptor;
+import com.sora.Interceptor.manager.EvictInterceptorsManager;
 import com.sora.annotation.CacheInterceptor;
+import com.sora.mediator.CacheContextMediator;
 import net.sf.cglib.proxy.MethodProxy;
 
-import java.lang.annotation.Annotation;
+
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * 拦截器执行类,其中维护了各种Cache拦截器。会先执行这些拦截器方法,再去执行被代理对象的方法。
  * @author Sora
  */
-public class CacheInterceptorExecutor {
+public class CacheInterceptorExecutor{
 
-    public Object execute(Object o, Method method, Object[] objects, MethodProxy methodProxy,CacheContext cacheContext) throws Throwable {
-        //TODO 完善该方法
-        System.out.println("通过代理类执行方法");
+    private static HashMap<CacheContext,CacheContextMediator> cacheContextMediatorMap = new HashMap<>();
+
+    List<BaseCacheInterceptor> evictInterceptorList = EvictInterceptorsManager.getEvictInterceptorList();
+
+    public <K,V> Object execute(Object o, Method method, Object[] objects, MethodProxy methodProxy,CacheContext<K,V> cacheContext) throws Throwable {
         CacheInterceptor cacheInterceptor = method.getAnnotation(CacheInterceptor.class);
-        // 只有存在该注解才去考虑开启了哪些拦截器
-        if(cacheInterceptor!=null && cacheInterceptor.evict()){
-            System.out.println("发现evict开启,执行驱逐策略");
+        if (cacheInterceptor != null){
+            // 只有存在@CacheInterceptor注解才执行拦截器
+            //初始化CacheContextMediator,即CacheContext的中介对象实例
+            CacheContextMediator cacheContextMediator = cacheContextMediatorMap.get(cacheContext);
+            if (cacheContextMediator == null){
+                cacheContextMediator = CacheContextMediator.newInstence()
+                        .cacheDataMap(cacheContext.getCacheDataMap())
+                        .maxSize(cacheContext.getMaxSize())
+                        .evictType(cacheContext.getEvictType())
+                        .expectRemoveRate(cacheContext.getExpectRemoveRate())
+                        .cacheEvict(cacheContext.getCacheEvict());
+                cacheContextMediatorMap.put(cacheContext,cacheContextMediator);
+            }
+
+            // 执行驱逐拦截器的前置方法
+            if (cacheInterceptor.evict()){
+                for(BaseCacheInterceptor evictInterceptor : evictInterceptorList){
+                    if(evictInterceptor.isBefore()){
+                        evictInterceptor.beforeProcess(cacheContextMediator);
+                    }
+                }
+            }
+
+            Object result = method.invoke(cacheContext, objects);
+
+            // 执行驱逐拦截器的后置方法
+            if (cacheInterceptor.evict()){
+                for(BaseCacheInterceptor evictInterceptor : evictInterceptorList){
+                    if(evictInterceptor.isAfter()){
+                        evictInterceptor.afterProcess(cacheContextMediator);
+                    }
+                }
+            }
+
+            //返回原方法执行结果
+            return result;
+
+        } else {
+            // 否则只执行原方法
+            return method.invoke(cacheContext,objects);
         }
-        System.out.println("然后执行原方法");
-        // TIP 注意method.invoke方法!原本是通过对象实例来调用方法,现在是通过method实例来指定某个对象调用method方法。
-        // TIP 这里正好可以指定原对象cacheContext执行原方法
-        return method.invoke(cacheContext,objects);
     }
 
 }
