@@ -3,6 +3,7 @@ package com.sora.cache;
 
 import com.sora.annotation.CacheInterceptor;
 import com.sora.exception.CacheRuntimeException;
+import com.sora.expire.IExpire;
 import com.sora.mediator.CacheContextMediator;
 import com.sora.strategy.evict.AbstractCacheEvict;
 
@@ -18,6 +19,11 @@ import java.util.Set;
  * @author Sora
  */
 public class CacheContext<K,V>{
+
+    /**
+     * 过期策略类
+     */
+    private IExpire<K,V> expire;
 
     /**
      * 保存缓存数据的Map
