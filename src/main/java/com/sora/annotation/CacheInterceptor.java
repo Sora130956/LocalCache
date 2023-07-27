@@ -20,4 +20,16 @@ public @interface CacheInterceptor {
      */
     boolean evict() default false;
 
+    /**
+     * 过期策略默认关闭。
+     * 该选项应该作用在获得缓存Map中某个特定的键值对上,用于惰性删除。如果该键值对已过期,则在原方法执行之前将其从缓存Map中删除。
+     * 该选项如果设置为true,则被注解方法的第一个参数必须是想要获取的键值对的key。
+     */
+    boolean expire() default false;
+
+    /**
+     * 该选项如果设置为true,则在原方法执行之前,会先将缓存Map中所有的过期键值对删除。
+     */
+    boolean refresh() default false;
+
 }

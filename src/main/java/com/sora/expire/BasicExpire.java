@@ -2,10 +2,7 @@ package com.sora.expire;
 
 import com.sora.mediator.CacheContextMediator;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 
 /**
@@ -24,11 +21,12 @@ public class BasicExpire<K,V> implements IExpire<K,V>{
     private ScheduledExecutorService scheduledScanExecutor;
 
     /**
-     * 过期Map与缓存Map是相关联的,所以过期策略类中需要依赖cache上下文的成员
+     * 过期Map与缓存Map是相关联的,所以过期策略类中需要依赖缓存Map
      */
-    CacheContextMediator<K,V> cacheContextMediator;
+    private final Map<K,V> cacheMap;
 
-    public BasicExpire() {
+    public BasicExpire(Map<K,V> cacheMap) {
+        this.cacheMap = cacheMap;
         init();
     }
 
@@ -40,7 +38,7 @@ public class BasicExpire<K,V> implements IExpire<K,V>{
 
     /**
      * @param key 设置过期时间的key
-     * @param ttl 设置的过期时间
+     * @param ttl 设置的过期时间,单位为毫秒
      * @return
      */
     @Override
@@ -64,11 +62,11 @@ public class BasicExpire<K,V> implements IExpire<K,V>{
      * @return 返回是否移除成功
      */
     @Override
-    public boolean clear(K key) {
+    public boolean expire(K key) {
         Long expiredTime = expireMap.get(key);
-        if (expiredTime < System.currentTimeMillis()){
+        if (Objects.nonNull(expiredTime) && expiredTime < System.currentTimeMillis()){
             expireMap.remove(key);
-            cacheContextMediator.getCacheDataMap().remove(key);
+            cacheMap.remove(key);
             return true;
         } else {
             return false;
@@ -77,18 +75,23 @@ public class BasicExpire<K,V> implements IExpire<K,V>{
 
     /**
      * 朴素的过期策略,每隔一秒钟就遍历过期Map,删除其中所有的过期Key
+     * 该方法必须严格地删除缓存Map中所有的过期键值对,不希望被修改,所以用final修饰。
      * @return 返回清除的键值对数目
      */
     @Override
     public int refresh() {
         Set<Map.Entry<K, Long>> entries = expireMap.entrySet();
-        long currentTimeMillis = System.currentTimeMillis();
         int startCount = entries.size();
+        if (startCount == 0){
+            return 0;
+        }
+        long currentTimeMillis = System.currentTimeMillis();
 
         Iterator<Map.Entry<K, Long>> iterator = entries.iterator();
         while (iterator.hasNext()){
             Map.Entry<K, Long> entry = iterator.next();
             if (entry.getValue() <= currentTimeMillis){
+                cacheMap.remove(entry.getKey());
                 iterator.remove();
             }
         }

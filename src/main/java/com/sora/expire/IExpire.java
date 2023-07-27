@@ -1,7 +1,5 @@
 package com.sora.expire;
 
-import com.sora.mediator.CacheContextMediator;
-
 /**
  * 过期策略接口
  * @param <K> CacheMap的Key
@@ -25,7 +23,7 @@ public interface IExpire<K,V> {
     /**
      * @param key 如果某个key对应的键值对过期了,将其从缓存Map和过期Map中移除
      */
-    boolean clear(K key);
+    boolean expire(K key);
 
     /**
      * 清空所有的过期键值对,这是定时扫描所执行的方法

@@ -26,7 +26,7 @@ public class CacheContextProxy<K,V> implements MethodInterceptor {
     @Override
     public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
         // 委托CacheInterceptorExecutor来执行方法
-        return cacheInterceptorExecutor.execute(o, method, objects, methodProxy, target);
+        return cacheInterceptorExecutor.execute(method, objects, methodProxy, target);
     }
 
     /**

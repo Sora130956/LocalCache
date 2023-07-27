@@ -79,5 +79,29 @@ public class TestCacheContext {
         System.out.println(cacheContext);
     }
 
+    @Test
+    public void testExpire() throws CacheRuntimeException, InterruptedException {
+        CacheContext<String,String> cacheContext = CacheContextBuilder.startBuilding()
+                .evictType(CacheEvictConsts.FIFO_EVICT)
+                .maxSize(32)
+                .expectRemoveRate(0.8F)
+                .build();
+
+        cacheContext.put("1","1");
+        cacheContext.put("2","2");
+        cacheContext.put("3","3");
+        cacheContext.put("4","4");
+        cacheContext.put("5","5");
+
+        cacheContext.expire("1",1000L);
+        cacheContext.expire("3",2000L);
+        System.out.println(cacheContext);
+
+        Thread.sleep(1100L);
+        System.out.println(cacheContext);
+
+        Thread.sleep(1100L);
+        System.out.println(cacheContext);
+    }
 
 }

@@ -1,5 +1,6 @@
 package com.sora.mediator;
 
+import com.sora.expire.IExpire;
 import com.sora.strategy.evict.AbstractCacheEvict;
 
 import java.util.Map;
@@ -9,6 +10,11 @@ import java.util.Map;
  * @author Sora
  */
 public class CacheContextMediator<K,V> extends BaseCacheContextMediator {
+
+    /**
+     * 过期策略
+     */
+    private IExpire<K,V> expire;
 
     /**
      * 保存缓存数据的Map
@@ -53,6 +59,10 @@ public class CacheContextMediator<K,V> extends BaseCacheContextMediator {
         return maxSize;
     }
 
+    public IExpire<K,V> getExpire() {
+        return expire;
+    }
+
     public AbstractCacheEvict getCacheEvict() {
         return cacheEvict;
     }
@@ -79,6 +89,11 @@ public class CacheContextMediator<K,V> extends BaseCacheContextMediator {
 
     public CacheContextMediator<K, V> cacheEvict(AbstractCacheEvict cacheEvict) {
         this.cacheEvict = cacheEvict;
+        return this;
+    }
+
+    public CacheContextMediator<K, V> expire(IExpire<K,V> expire) {
+        this.expire = expire;
         return this;
     }
 

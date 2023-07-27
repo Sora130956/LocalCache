@@ -4,9 +4,9 @@ package com.sora.cache;
 import com.sora.annotation.CacheInterceptor;
 import com.sora.exception.CacheRuntimeException;
 import com.sora.expire.IExpire;
-import com.sora.mediator.CacheContextMediator;
 import com.sora.strategy.evict.AbstractCacheEvict;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,7 +18,7 @@ import java.util.Set;
  * @param <V> 缓存Map的Value
  * @author Sora
  */
-public class CacheContext<K,V>{
+public class CacheContext<K,V> {
 
     /**
      * 过期策略类
@@ -53,18 +53,20 @@ public class CacheContext<K,V>{
 
     public CacheContext(){}
 
-    public CacheContext(Map<K, V> cacheDataMap, AbstractCacheEvict cacheEvict, String evictType, int maxSize, float expectRemoveRate) {
+    public CacheContext(Map<K, V> cacheDataMap, AbstractCacheEvict cacheEvict, String evictType, int maxSize, float expectRemoveRate,IExpire<K,V> expire) {
         this.cacheDataMap = cacheDataMap;
         this.cacheEvict = cacheEvict;
         this.evictType = evictType;
         this.maxSize = maxSize;
         this.expectRemoveRate = expectRemoveRate;
+        this.expire = expire;
     }
 
     public String getEvictType(){
         return this.evictType;
     }
 
+    @CacheInterceptor(expire = true)
     public V get(K key){
         return cacheDataMap.get(key);
     }
@@ -74,7 +76,6 @@ public class CacheContext<K,V>{
      */
     @CacheInterceptor(evict = true)
     public V put(K key,V value) throws CacheRuntimeException {
-        // 触发驱逐策略后,如果还无法容纳数据,则抛出异常。
         if (cacheDataMap.size() < maxSize){
             return cacheDataMap.put(key, value);
         } else {
@@ -82,16 +83,67 @@ public class CacheContext<K,V>{
         }
     }
 
+    public boolean expire(K key,Long ttl){
+        return expire.expire(key,ttl);
+    }
+
+    @CacheInterceptor(refresh = true)
     public int size(){
         return cacheDataMap.size();
+    }
+
+    @CacheInterceptor(refresh = true)
+    public boolean isEmpty() {
+        return cacheDataMap.isEmpty();
+    }
+
+    @CacheInterceptor(expire = true)
+    public boolean containsKey(K key) {
+        return cacheDataMap.containsKey(key);
+    }
+
+    /**
+     * TODO 每次调用这个方法都要清空一次缓存Map中的过期键值对,如果经常调用这个方法,就会造成很多次无意义地遍历过期Map。有什么好办法解决？
+     */
+    @CacheInterceptor(refresh = true)
+    public boolean containsValue(V value) {
+        return cacheDataMap.containsValue(value);
+    }
+
+    public V remove(K key) {
+        return cacheDataMap.remove(key);
+    }
+
+    public void putAll(Map<K,V> m) {
+        cacheDataMap.putAll(m);
+    }
+
+    public void clear() {
+        cacheDataMap.clear();
+    }
+
+    @CacheInterceptor(refresh = true)
+    public Set<K> keySet() {
+        return cacheDataMap.keySet();
+    }
+
+    @CacheInterceptor(refresh = true)
+    public Collection<V> values() {
+        return cacheDataMap.values();
+    }
+
+    @CacheInterceptor(refresh = true)
+    public Set<Map.Entry<K,V>> entrySet() {
+        return cacheDataMap.entrySet();
     }
 
     /**
      * @return 返回cacheDataMap中的键值对内容
      */
     @Override
+    @CacheInterceptor(refresh = true)
     public String toString() {
-        Set<Map.Entry<K, V>> entries = cacheDataMap.entrySet();
+        Set<Map.Entry<K, V>> entries = entrySet();
         StringBuilder sb = new StringBuilder();
         sb.append("CacheSize:").append(cacheDataMap.size()).append("\r\n");
         sb.append("MaxSize:").append(this.maxSize).append("\r\n");
@@ -120,4 +172,6 @@ public class CacheContext<K,V>{
     float getExpectRemoveRate() {
         return expectRemoveRate;
     }
+
+    IExpire<K,V> getExpire(){return expire;}
 }

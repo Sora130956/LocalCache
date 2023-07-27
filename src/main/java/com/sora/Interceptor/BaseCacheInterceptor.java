@@ -3,6 +3,9 @@ package com.sora.Interceptor;
 
 import com.sora.exception.CacheRuntimeException;
 import com.sora.mediator.CacheContextMediator;
+import net.sf.cglib.proxy.MethodProxy;
+
+import java.lang.reflect.Method;
 
 /**
  * 拦截器基类
@@ -25,8 +28,8 @@ public abstract class BaseCacheInterceptor {
      */
     public final int PRIORITY = 0;
 
-    public abstract <K,V> Object beforeProcess(CacheContextMediator<K,V> cacheContextMediator) throws CacheRuntimeException;
+    public abstract <K,V> Object beforeProcess(CacheContextMediator<K,V> cacheContextMediator, Method method, Object[] objects, MethodProxy methodProxy) throws CacheRuntimeException;
 
-    public abstract <K,V> Object afterProcess(CacheContextMediator<K,V> cacheContextMediator) throws CacheRuntimeException;
+    public abstract <K,V> Object afterProcess(CacheContextMediator<K,V> cacheContextMediator, Method method, Object[] objects, MethodProxy methodProxy) throws CacheRuntimeException;
 
 }
