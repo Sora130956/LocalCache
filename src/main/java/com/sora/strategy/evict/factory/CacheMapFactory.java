@@ -1,7 +1,9 @@
-package com.sora.map;
+package com.sora.strategy.evict.factory;
 
 import com.sora.exception.CacheRuntimeException;
 import com.sora.strategy.evict.CacheEvictConsts;
+import com.sora.strategy.evict.map.FIFOMap;
+import com.sora.strategy.evict.map.LRUMap;
 
 import java.util.Map;
 

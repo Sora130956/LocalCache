@@ -1,6 +1,4 @@
-package com.sora.expire;
-
-import com.sora.mediator.CacheContextMediator;
+package com.sora.strategy.expire;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -13,21 +11,24 @@ public class BasicExpire<K,V> implements IExpire<K,V>{
     /**
      * 过期时间Map
      */
-    private HashMap<K,Long> expireMap = new HashMap<>();
+    protected HashMap<K,Long> expireMap = new HashMap<>();
 
     /**
      * 管理执行定时扫描任务的线程的线程池,这个线程池只管理一个线程。
      */
-    private ScheduledExecutorService scheduledScanExecutor;
+    protected ScheduledExecutorService scheduledScanExecutor;
 
     /**
      * 过期Map与缓存Map是相关联的,所以过期策略类中需要依赖缓存Map
      */
-    private final Map<K,V> cacheMap;
+    protected Map<K,V> cacheMap;
 
     public BasicExpire(Map<K,V> cacheMap) {
         this.cacheMap = cacheMap;
         init();
+    }
+
+    public BasicExpire() {
     }
 
     public void init(){
@@ -53,8 +54,12 @@ public class BasicExpire<K,V> implements IExpire<K,V>{
      */
     @Override
     public boolean expireAt(K key, Long timeStamp) {
-        expireMap.put(key, timeStamp);
-        return true;
+        if(cacheMap.containsKey(key)) {
+            expireMap.put(key, timeStamp);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**

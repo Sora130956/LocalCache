@@ -2,11 +2,15 @@ package com.sora.cache;
 
 import com.sora.exception.CacheRuntimeException;
 import com.sora.strategy.evict.CacheEvictConsts;
+import com.sora.strategy.expire.ExpireConsts;
 import org.junit.Test;
 import org.junit.*;
 import static org.junit.Assert.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * @author Sora
@@ -17,7 +21,7 @@ public class TestCacheContext {
 
     @Test
     public void testCacheContextBuilder() throws CacheRuntimeException {
-        CacheContext<String,String> cacheContext = CacheContextBuilder.startBuilding()
+        CacheContext<String,String> cacheContext = CacheContextBuilder.<String,String>startBuilding()
                 .evictType(CacheEvictConsts.FIFO_EVICT)
                 .maxSize(32)
                 .expectRemoveRate(0.8F)
@@ -52,7 +56,7 @@ public class TestCacheContext {
 
     @Test
     public void testCacheContextWithRandomData() throws CacheRuntimeException {
-        CacheContext<String,String> cacheContext = CacheContextBuilder.startBuilding()
+        CacheContext<String,String> cacheContext = CacheContextBuilder.<String,String>startBuilding()
                 .evictType(CacheEvictConsts.LRU)
                 .maxSize(32)
                 .expectRemoveRate(0.8F)
@@ -81,10 +85,11 @@ public class TestCacheContext {
 
     @Test
     public void testExpire() throws CacheRuntimeException, InterruptedException {
-        CacheContext<String,String> cacheContext = CacheContextBuilder.startBuilding()
+        CacheContext<String,String> cacheContext = CacheContextBuilder.<String,String>startBuilding()
                 .evictType(CacheEvictConsts.FIFO_EVICT)
                 .maxSize(32)
                 .expectRemoveRate(0.8F)
+                .expireType(ExpireConsts.BASIC_EXPIRE)
                 .build();
 
         cacheContext.put("1","1");
@@ -101,6 +106,12 @@ public class TestCacheContext {
         System.out.println(cacheContext);
 
         Thread.sleep(1100L);
+        System.out.println(cacheContext);
+        cacheContext.expire("2",1000L);
+        cacheContext.expire("4",4000L);
+        cacheContext.expire("1",100L);
+        cacheContext.expire("3",1000L);
+        Thread.sleep(5000L);
         System.out.println(cacheContext);
     }
 

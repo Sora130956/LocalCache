@@ -1,6 +1,6 @@
 package com.sora.mediator;
 
-import com.sora.expire.IExpire;
+import com.sora.strategy.expire.IExpire;
 import com.sora.strategy.evict.AbstractCacheEvict;
 
 import java.util.Map;

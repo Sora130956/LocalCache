@@ -1,4 +1,4 @@
-package com.sora.map;
+package com.sora.strategy.evict.map;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

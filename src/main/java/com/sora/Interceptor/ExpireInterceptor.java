@@ -1,7 +1,6 @@
 package com.sora.Interceptor;
 
 import com.sora.exception.CacheRuntimeException;
-import com.sora.expire.IExpire;
 import com.sora.mediator.CacheContextMediator;
 import net.sf.cglib.proxy.MethodProxy;
 

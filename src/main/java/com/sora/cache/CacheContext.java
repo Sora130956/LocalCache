@@ -3,7 +3,7 @@ package com.sora.cache;
 
 import com.sora.annotation.CacheInterceptor;
 import com.sora.exception.CacheRuntimeException;
-import com.sora.expire.IExpire;
+import com.sora.strategy.expire.IExpire;
 import com.sora.strategy.evict.AbstractCacheEvict;
 
 import java.util.Collection;

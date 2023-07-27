@@ -1,7 +1,7 @@
 package com.sora.strategy.evict;
 
 import com.sora.exception.CacheRuntimeException;
-import com.sora.map.FIFOMap;
+import com.sora.strategy.evict.map.FIFOMap;
 import com.sora.mediator.CacheContextMediator;
 
 /**

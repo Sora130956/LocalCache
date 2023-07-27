@@ -1,4 +1,4 @@
-package com.sora.map;
+package com.sora.strategy.evict.factory;
 
 import com.sora.exception.CacheRuntimeException;
 import com.sora.strategy.evict.AbstractCacheEvict;

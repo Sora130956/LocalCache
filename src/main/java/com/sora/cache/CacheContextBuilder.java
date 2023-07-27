@@ -1,12 +1,14 @@
 package com.sora.cache;
 
 import com.sora.exception.CacheRuntimeException;
-import com.sora.expire.BasicExpire;
-import com.sora.expire.IExpire;
-import com.sora.map.CacheEvictFactory;
-import com.sora.map.CacheMapFactory;
+import com.sora.strategy.expire.BasicExpire;
+import com.sora.strategy.expire.ExpireConsts;
+import com.sora.strategy.expire.IExpire;
+import com.sora.strategy.evict.factory.CacheEvictFactory;
+import com.sora.strategy.evict.factory.CacheMapFactory;
 import com.sora.proxy.CacheContextProxy;
 import com.sora.strategy.evict.CacheEvictConsts;
+import com.sora.strategy.expire.factory.ExpireFactory;
 
 import java.util.Map;
 import java.util.Objects;
@@ -27,6 +29,11 @@ public class CacheContextBuilder<K,V> {
     private String evictType = CacheEvictConsts.FIFO_EVICT;
 
     /**
+     * 默认过期策略为定时扫描+惰性删除
+     */
+    private String expireType = ExpireConsts.BASIC_EXPIRE;
+
+    /**
      * Context的成员
      */
     private int maxSize = 16;
@@ -38,7 +45,7 @@ public class CacheContextBuilder<K,V> {
 
     private IExpire<K,V> expire = null;
 
-    public static CacheContextBuilder startBuilding(){
+    public static <K,V> CacheContextBuilder<K,V> startBuilding(){
         return new CacheContextBuilder();
     }
 
@@ -57,8 +64,8 @@ public class CacheContextBuilder<K,V> {
         return this;
     }
 
-    public CacheContextBuilder<K,V> expire(IExpire<K,V> expire) {
-        this.expire = expire;
+    public CacheContextBuilder<K,V> expireType(String expireType) {
+        this.expireType = expireType;
         return this;
     }
 
@@ -67,9 +74,6 @@ public class CacheContextBuilder<K,V> {
      */
     public CacheContext<K,V> build() throws CacheRuntimeException {
         Map<K, V> cacheMap = CacheMapFactory.getCacheMap(this.evictType, this.maxSize, this.expectRemoveRate);
-        if (Objects.isNull(expire)){
-            expire = new BasicExpire<>(cacheMap);
-        }
 
         CacheContext<K,V> cacheContext = new CacheContext<>(
                 cacheMap,
@@ -77,7 +81,7 @@ public class CacheContextBuilder<K,V> {
                 this.evictType,
                 this.maxSize,
                 this.expectRemoveRate,
-                this.expire
+                ExpireFactory.getExpire(expireType,cacheMap)
         );
 
         // 返回代理对象
