@@ -4,6 +4,11 @@ import com.github.sora.strategy.evict.CacheEvictConst;
 import com.github.sora.strategy.expire.ExpireConst;
 import com.github.sora.exception.CacheRuntimeException;
 import org.junit.Test;
+import org.nustaq.serialization.FSTConfiguration;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Objects;
 
 /**
  * @author Sora
@@ -61,6 +66,33 @@ public class TestCacheContext {
         cacheContext.expire("3",1000L);
         Thread.sleep(5000L);
         System.out.println(cacheContext);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testSerial() throws CacheRuntimeException, InterruptedException, IOException {
+        CacheContext<String,String> cacheContext = CacheContextBuilder.<String,String>startBuilding()
+                .evictType(CacheEvictConst.FIFO_EVICT)
+                .maxSize(32)
+                .expectRemoveRate(0.8F)
+                .serialName("FORTEST")
+                .build();
+
+        for(int i=0;i<100;i++){
+            cacheContext.put(String.valueOf(i),String.valueOf(i));
+        }
+        System.out.println(cacheContext);
+
+        System.out.println(cacheContext.getSerialName());
+
+        cacheContext.serial();
+
+        String fileName = cacheContext.getSerialName();
+
+        CacheContext<String, String> loadedCacheContext = CacheContextBuilder.<String, String>startBuilding().loadCacheContext(fileName);
+
+        System.out.println(loadedCacheContext);
+
     }
 
 }

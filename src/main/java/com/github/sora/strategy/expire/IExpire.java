@@ -1,12 +1,14 @@
 package com.github.sora.strategy.expire;
 
+import java.io.Serializable;
+
 /**
  * 过期策略接口
  * @param <K> CacheMap的Key
  * @param <V> CacheMap的Value
  * @author Sora
  */
-public interface IExpire<K,V> {
+public interface IExpire<K,V> extends Serializable {
 
     /**
      * 为某个缓存Map中的键值对设置过期时间

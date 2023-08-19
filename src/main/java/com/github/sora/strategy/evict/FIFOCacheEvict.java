@@ -12,9 +12,6 @@ public class FIFOCacheEvict extends AbstractCacheEvict{
 
     @Override
     public <K,V> void doEvict(CacheContextMediator<K,V> context) throws CacheRuntimeException {
-        if (!CacheEvictConst.FIFO_EVICT.equals(context.getEvictType())){
-            throw new CacheRuntimeException("驱逐策略不匹配,尝试驱逐数据失败");
-        }
 
         FIFOMap<K,V> cacheDataMap = (FIFOMap<K,V>)context.getCacheDataMap();
         boolean full = cacheDataMap.size() >= context.getMaxSize()*context.getExpectRemoveRate();

@@ -11,7 +11,7 @@ public class BasicExpire<K,V> implements IExpire<K,V>{
     /**
      * 过期时间Map
      */
-    protected HashMap<K,Long> expireMap = new HashMap<>();
+    protected HashMap<K,Long> expireMap;
 
     /**
      * 管理执行定时扫描任务的线程的线程池,这个线程池只管理一个线程。
@@ -23,8 +23,10 @@ public class BasicExpire<K,V> implements IExpire<K,V>{
      */
     protected Map<K,V> cacheMap;
 
-    public BasicExpire(Map<K,V> cacheMap) {
+    @SuppressWarnings("unchecked")
+    public BasicExpire(Map<K,V> cacheMap,Map expireMap) {
         this.cacheMap = cacheMap;
+        this.expireMap = (HashMap<K, Long>) expireMap;
         init();
     }
 

@@ -2,6 +2,7 @@ package com.github.sora.proxy;
 
 import com.github.sora.core.CacheContext;
 import com.github.sora.core.CacheInterceptorExecutor;
+import com.sun.org.apache.xpath.internal.operations.Equals;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;

@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.sora</groupId>
-    <artifactId>MyCache</artifactId>
+    <artifactId>LocalCache</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
@@ -31,6 +31,11 @@
             <groupId>cglib</groupId>
             <artifactId>cglib</artifactId>
             <version>3.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>de.ruedigermoeller</groupId>
+            <artifactId>fst</artifactId>
+            <version>2.57</version>
         </dependency>
     </dependencies>
 

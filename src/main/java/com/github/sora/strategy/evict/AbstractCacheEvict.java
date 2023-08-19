@@ -3,11 +3,13 @@ package com.github.sora.strategy.evict;
 import com.github.sora.exception.CacheRuntimeException;
 import com.github.sora.mediator.CacheContextMediator;
 
+import java.io.Serializable;
+
 /**
  * 驱逐策略抽象类
  * @author Sora
  */
-public abstract class AbstractCacheEvict {
+public abstract class AbstractCacheEvict implements Serializable {
 
     /**
      * 当数据量达到maxSize时进行驱逐

@@ -60,7 +60,6 @@ public class CacheInterceptorExecutor{
                 cacheContextMediator = CacheContextMediator.<K,V>newInstance()
                         .cacheDataMap(cacheContext.getCacheDataMap())
                         .maxSize(cacheContext.getMaxSize())
-                        .evictType(cacheContext.getEvictType())
                         .expectRemoveRate(cacheContext.getExpectRemoveRate())
                         .cacheEvict(cacheContext.getCacheEvict())
                         .expire(cacheContext.getExpire());

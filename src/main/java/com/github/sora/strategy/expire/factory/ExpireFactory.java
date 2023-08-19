@@ -6,6 +6,7 @@ import com.github.sora.strategy.expire.BasicExpire;
 import com.github.sora.strategy.expire.IExpire;
 import com.github.sora.strategy.expire.SortExpire;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -14,11 +15,11 @@ import java.util.Map;
  */
 public class ExpireFactory {
 
-    public static <K,V> IExpire<K,V> getExpire(String expireType, Map<K,V> cacheMap) throws CacheRuntimeException {
+    public static <K,V> IExpire<K,V> getExpire(String expireType, Map<K,V> cacheMap, Map expireMap) throws CacheRuntimeException {
 
         switch (expireType){
             case ExpireConst.BASIC_EXPIRE:{
-                return new BasicExpire<>(cacheMap);
+                return new BasicExpire<>(cacheMap,expireMap);
             }
             case ExpireConst.SORT_EXPIRE:{
                 return new SortExpire<>(cacheMap);

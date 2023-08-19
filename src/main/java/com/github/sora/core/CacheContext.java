@@ -5,11 +5,12 @@ import com.github.sora.annotation.CacheInterceptor;
 import com.github.sora.exception.CacheRuntimeException;
 import com.github.sora.strategy.expire.IExpire;
 import com.github.sora.strategy.evict.AbstractCacheEvict;
+import com.github.sora.strategy.serialize.ISerial;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.text.DateFormat;
+import java.util.*;
 
 
 /**
@@ -20,7 +21,12 @@ import java.util.Set;
  * @author Sora
  */
 @SuppressWarnings("unused")
-public class CacheContext<K,V> {
+public class CacheContext<K,V> implements Serializable {
+
+    /**
+     * 持久化策略
+     */
+    private ISerial<K,V> serial;
 
     /**
      * 过期策略
@@ -37,10 +43,6 @@ public class CacheContext<K,V> {
      */
     private AbstractCacheEvict cacheEvict;
 
-    /**
-     * 驱逐策略类型
-     */
-    private String evictType;
 
     /**
      * 指定的缓存最大容量,元素数量超过maxSize就会触发驱逐策略。
@@ -52,19 +54,25 @@ public class CacheContext<K,V> {
      */
     private float expectRemoveRate;
 
+    private String serialName;
+
+    public String getSerialName() {
+        return serialName;
+    }
+
     public CacheContext(){}
 
-    public CacheContext(Map<K, V> cacheDataMap, AbstractCacheEvict cacheEvict, String evictType, int maxSize, float expectRemoveRate,IExpire<K,V> expire) {
+    public CacheContext(Map<K, V> cacheDataMap, AbstractCacheEvict cacheEvict, int maxSize, float expectRemoveRate,IExpire<K,V> expire,String serialName) {
         this.cacheDataMap = cacheDataMap;
         this.cacheEvict = cacheEvict;
-        this.evictType = evictType;
         this.maxSize = maxSize;
         this.expectRemoveRate = expectRemoveRate;
         this.expire = expire;
+        this.serialName = serialName;
     }
 
-    public String getEvictType(){
-        return this.evictType;
+    void setSerial(ISerial<K, V> serial) {
+        this.serial = serial;
     }
 
     @CacheInterceptor(expire = true)
@@ -79,6 +87,11 @@ public class CacheContext<K,V> {
         } else {
             throw new CacheRuntimeException("缓存已满,无法添加更多数据。");
         }
+    }
+
+    public boolean serial(){
+        this.serial.doSerial();
+        return true;
     }
 
     public boolean expire(K key,Long ttl){
@@ -179,12 +192,12 @@ public class CacheContext<K,V> {
             return false;
         }
         CacheContext<?, ?> that = (CacheContext<?, ?>) o;
-        return maxSize == that.maxSize && Float.compare(that.expectRemoveRate, expectRemoveRate) == 0 && Objects.equals(expire, that.expire) && Objects.equals(cacheDataMap, that.cacheDataMap) && Objects.equals(cacheEvict, that.cacheEvict) && Objects.equals(evictType, that.evictType);
+        return maxSize == that.maxSize && Float.compare(that.expectRemoveRate, expectRemoveRate) == 0 && Objects.equals(expire, that.expire) && Objects.equals(cacheDataMap, that.cacheDataMap) && Objects.equals(cacheEvict, that.cacheEvict);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(expire, cacheDataMap, cacheEvict, evictType, maxSize, expectRemoveRate);
+        return Objects.hash(expire, cacheDataMap, cacheEvict, maxSize, expectRemoveRate);
     }
 
 }
