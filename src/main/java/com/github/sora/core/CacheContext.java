@@ -82,11 +82,7 @@ public class CacheContext<K,V> implements Serializable {
 
     @CacheInterceptor(evict = true)
     public V put(K key,V value) throws CacheRuntimeException {
-        if (cacheDataMap.size() < maxSize){
-            return cacheDataMap.put(key, value);
-        } else {
-            throw new CacheRuntimeException("缓存已满,无法添加更多数据。");
-        }
+        return cacheDataMap.put(key, value);
     }
 
     public boolean serial(){
