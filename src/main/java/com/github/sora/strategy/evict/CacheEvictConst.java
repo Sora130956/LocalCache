@@ -10,4 +10,6 @@ public class CacheEvictConst {
 
     public static final String LRU = "LRU";
 
+    public static final String WTinyLFU = "WTinyLFU";
+
 }

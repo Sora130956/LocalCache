@@ -3,6 +3,7 @@ package com.github.sora.core;
 
 import com.github.sora.annotation.CacheInterceptor;
 import com.github.sora.exception.CacheRuntimeException;
+import com.github.sora.strategy.evict.WTinyLFUEvict;
 import com.github.sora.strategy.expire.IExpire;
 import com.github.sora.strategy.evict.AbstractCacheEvict;
 import com.github.sora.strategy.serialize.ISerial;
@@ -118,10 +119,6 @@ public class CacheContext<K,V> implements Serializable {
         return cacheDataMap.remove(key);
     }
 
-    public void putAll(Map<K,V> m) {
-        cacheDataMap.putAll(m);
-    }
-
     public void clear() {
         cacheDataMap.clear();
     }
@@ -147,14 +144,20 @@ public class CacheContext<K,V> implements Serializable {
     @Override
     @CacheInterceptor(refresh = true)
     public String toString() {
+
+        if (this.cacheEvict instanceof WTinyLFUEvict){
+            return this.cacheDataMap.toString();
+        }
+
         Set<Map.Entry<K, V>> entries = entrySet();
         StringBuilder sb = new StringBuilder();
-        sb.append("CacheSize:").append(cacheDataMap.size()).append("\r\n");
+        sb.append("CacheSize:").append(entries.size()).append("\r\n");
         sb.append("MaxSize:").append(this.maxSize).append("\r\n");
         for(Map.Entry<K,V> entry : entries){
             sb.append("Key:").append(entry.getKey()).append("   Value:").append(entry.getValue()).append("\r\n");
         }
         return sb.toString();
+
     }
 
 

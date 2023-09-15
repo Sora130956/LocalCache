@@ -4,11 +4,9 @@ import com.github.sora.strategy.evict.CacheEvictConst;
 import com.github.sora.strategy.expire.ExpireConst;
 import com.github.sora.exception.CacheRuntimeException;
 import org.junit.Test;
-import org.nustaq.serialization.FSTConfiguration;
-
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Objects;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Sora
@@ -20,9 +18,10 @@ public class TestCacheContext {
      */
     @Test
     public void testCacheContextBuilder() throws CacheRuntimeException {
+
         CacheContext<String,String> cacheContext = CacheContextBuilder.<String,String>startBuilding()
-                .evictType(CacheEvictConst.FIFO_EVICT)
-                .maxSize(32)
+                .evictType(CacheEvictConst.WTinyLFU)
+                .maxSize(128)
                 .expectRemoveRate(0.8F)
                 .build();
 
@@ -93,6 +92,32 @@ public class TestCacheContext {
 
         System.out.println(loadedCacheContext);
 
+    }
+
+    @Test
+    public void testWLFU() throws CacheRuntimeException {
+        CacheContext<String,String> cacheContext = CacheContextBuilder.<String,String>startBuilding()
+                .evictType(CacheEvictConst.WTinyLFU)
+                .maxSize(128)
+                .expectRemoveRate(0.8F)
+                .build();
+
+        for(int i=0;i<100;i++){
+            cacheContext.put(String.valueOf(i),String.valueOf(i));
+        }
+
+        for(int i=0;i<20;i++){
+            cacheContext.get(String.valueOf(i));
+            cacheContext.get(String.valueOf(i));
+            cacheContext.get(String.valueOf(i));
+        }
+
+
+        for(int i=0;i<100;i++){
+            cacheContext.put(String.valueOf(i),String.valueOf(i));
+        }
+
+        System.out.println(cacheContext);
     }
 
 }

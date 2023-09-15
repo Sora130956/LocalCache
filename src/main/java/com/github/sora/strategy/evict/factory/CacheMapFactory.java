@@ -4,6 +4,7 @@ import com.github.sora.exception.CacheRuntimeException;
 import com.github.sora.strategy.evict.CacheEvictConst;
 import com.github.sora.strategy.evict.map.FIFOMap;
 import com.github.sora.strategy.evict.map.LRUMap;
+import com.github.sora.strategy.evict.map.WindowMap;
 
 import java.util.Map;
 
@@ -22,6 +23,10 @@ public class CacheMapFactory {
 
             case CacheEvictConst.LRU:{
                 return new LRUMap<>(maxSize,expectRemoveRate);
+            }
+
+            case CacheEvictConst.WTinyLFU:{
+                return new WindowMap<>(maxSize,expectRemoveRate);
             }
 
             default:{

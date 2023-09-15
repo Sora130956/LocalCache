@@ -1,9 +1,8 @@
 package com.github.sora.strategy.evict.map;
 
-import com.github.sora.strategy.evict.SketchFilter;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Sora
@@ -41,6 +40,17 @@ public class ProtectedMap<K,V> extends LinkedHashMap<K,V> {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 当key存在于protected时更新值
+     * @return 如果key存在，返回旧值。如果key不存在，返回null。
+     */
+    public V update(K key, V value) {
+        if (this.containsKey(key)){
+            return this.put(key, value);
+        }
+        return null;
     }
 
 }
