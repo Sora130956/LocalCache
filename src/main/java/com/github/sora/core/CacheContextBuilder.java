@@ -5,6 +5,9 @@ import com.github.sora.mediator.CacheContextSerialMediator;
 import com.github.sora.proxy.CacheContextProxy;
 import com.github.sora.strategy.evict.CacheEvictConst;
 import com.github.sora.strategy.evict.factory.CacheMapFactory;
+import com.github.sora.strategy.evict.map.Entry;
+import com.github.sora.strategy.evict.map.SketchFilter;
+import com.github.sora.strategy.evict.map.WindowMap;
 import com.github.sora.strategy.expire.ExpireConst;
 import com.github.sora.strategy.expire.factory.ExpireFactory;
 import com.github.sora.strategy.evict.factory.CacheEvictFactory;
@@ -17,11 +20,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 /**
@@ -125,7 +131,7 @@ public class CacheContextBuilder<K,V> {
      * @return 反序列化后得到的CacheContext
      */
     @SuppressWarnings("unchecked")
-    public CacheContext<K,V> loadCacheContext(String fileName) throws IOException, CacheRuntimeException {
+    public CacheContext<K,V> loadCacheContext(String fileName) throws IOException, CacheRuntimeException, NoSuchFieldException, IllegalAccessException {
         File cacheContextFile = new File(fileName);
         FileInputStream fileInputStream = new FileInputStream(cacheContextFile);
         long len = cacheContextFile.length();
@@ -141,6 +147,22 @@ public class CacheContextBuilder<K,V> {
         Map cacheMap = cacheContextSerialMediator.getCacheMap();
         Map expireMap = cacheContextSerialMediator.getExpireMap();
 
+        if (evictType.equals(CacheEvictConst.WTinyLFU)){
+            // 如果驱逐策略为WTinyLFU,则需要重新设置SketchFilter中的election成员
+            WindowMap<K,V> windowMap = (WindowMap<K, V>) cacheMap;
+            Class<WindowMap> windowMapClass = WindowMap.class;
+            Field sketchFilter = windowMapClass.getDeclaredField("sketchFilter");
+            /**
+             * 如果不设置accessible为true则没有对private成员的访问权限
+             * java.lang.IllegalAccessException:
+             * Class com.github.sora.core.CacheContextBuilder can not access a member of
+             * class com.github.sora.strategy.evict.map.WindowMap with modifiers "private"
+             */
+            sketchFilter.setAccessible(true);
+            SketchFilter sketchFilterFromWindowMap = (SketchFilter) sketchFilter.get(windowMap);
+            sketchFilterFromWindowMap.recreateElection();
+        }
+
         CacheContext<K,V> cacheContext = new CacheContext<>(
                 cacheMap,
                 CacheEvictFactory.getCacheEvict(this.evictType),
@@ -151,6 +173,8 @@ public class CacheContextBuilder<K,V> {
         );
 
         cacheContext.setSerial(SerailFactory.getSerial(this.serialType,cacheContextSerialMediator));
+
+
 
         return new CacheContextProxy<>(cacheContext).proxy();
     }

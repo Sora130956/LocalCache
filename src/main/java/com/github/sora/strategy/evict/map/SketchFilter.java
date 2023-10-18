@@ -1,5 +1,6 @@
 package com.github.sora.strategy.evict.map;
 
+import java.io.Serializable;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -9,9 +10,10 @@ import java.util.concurrent.LinkedBlockingDeque;
  * Count-Min Sketch算法实现的LFU过滤器
  * @author Sora
  */
-public class SketchFilter<K,V>{
+public class SketchFilter<K,V> implements Serializable {
 
-    private final ExecutorService election;
+
+    private transient ExecutorService election;
 
     private ProbationMap<K,V> probationZone;
 
@@ -34,6 +36,40 @@ public class SketchFilter<K,V>{
         probationZone = new ProbationMap<>(probationSize,this);
         election = Executors.newSingleThreadExecutor();
         // 消费者，淘汰victim或者candidate,未被淘汰的加入probation
+        election.execute(() -> {
+            while (true){
+                try {
+                    Entry<K,V> victim = victims.take();
+                    Entry<K,V> candidate = candidates.take();
+                    // 根据victim和candidate在sketch中记录的历史频率值来淘汰某一方
+                    // 策略上优先淘汰probation来的victim,避免新的热点数据难以进入缓存的问题
+                    byte victimFreq = frequency(victim.getValue());
+                    byte candidateFreq = frequency(candidate.getValue());
+                    if (candidateFreq > victimFreq){
+                        // 如果candidate的频率更高，直接淘汰victim
+                        probationZone.put(candidate.getKey(), candidate.getValue());
+                        continue;
+                    }
+                    if (candidateFreq < 5){
+                        // 如果candidate的频率小于5，且victim的频率更高，则直接淘汰candidate
+                        probationZone.put(victim.getKey(), victim.getValue());
+                        continue;
+                    }
+                    // 如果candidate和victim的频率都比较高，且victim的频率更高，则随机淘汰candidate或者victim
+                    if (random.nextBoolean()){
+                        probationZone.put(candidate.getKey(), candidate.getValue());
+                    } else {
+                        probationZone.put(victim.getKey(), victim.getValue());
+                    }
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+    }
+
+    public void recreateElection(){
+        this.election = Executors.newSingleThreadExecutor();
         election.execute(() -> {
             while (true){
                 try {
